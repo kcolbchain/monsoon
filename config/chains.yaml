@@ -1,0 +1,42 @@
+chains:
+  ethereum:
+    name: Ethereum
+    chain_id: 1
+    rpc_url: https://eth.llamarpc.com
+    native_token: ETH
+    explorer: https://etherscan.io
+
+  arbitrum:
+    name: Arbitrum
+    chain_id: 42161
+    rpc_url: https://arb1.arbitrum.io/rpc
+    native_token: ETH
+    explorer: https://arbiscan.io
+
+  optimism:
+    name: Optimism
+    chain_id: 10
+    rpc_url: https://mainnet.optimism.io
+    native_token: ETH
+    explorer: https://optimistic.etherscan.io
+
+  base:
+    name: Base
+    chain_id: 8453
+    rpc_url: https://mainnet.base.org
+    native_token: ETH
+    explorer: https://basescan.org
+
+  bsc:
+    name: BSC
+    chain_id: 56
+    rpc_url: https://bsc-dataseed.binance.org
+    native_token: BNB
+    explorer: https://bscscan.com
+
+  polygon:
+    name: Polygon
+    chain_id: 137
+    rpc_url: https://polygon-rpc.com
+    native_token: MATIC
+    explorer: https://polygonscan.com

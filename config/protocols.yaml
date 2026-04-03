@@ -1,0 +1,36 @@
+protocols:
+  bridges:
+    stargate:
+      label: Stargate Finance
+      chains: [ethereum, arbitrum, optimism, base, polygon, bsc]
+      type: bridge
+    across:
+      label: Across Protocol
+      chains: [ethereum, arbitrum, optimism, base, polygon]
+      type: bridge
+    hop:
+      label: Hop Protocol
+      chains: [ethereum, arbitrum, optimism, polygon]
+      type: bridge
+
+  dexes:
+    uniswap:
+      label: Uniswap V3
+      chains: [ethereum, arbitrum, optimism, base, polygon]
+      type: dex
+    velodrome:
+      label: Velodrome
+      chains: [optimism]
+      type: dex
+    aerodrome:
+      label: Aerodrome
+      chains: [base]
+      type: dex
+    camelot:
+      label: Camelot
+      chains: [arbitrum]
+      type: dex
+    pancakeswap:
+      label: PancakeSwap
+      chains: [bsc]
+      type: dex
