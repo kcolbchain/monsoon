@@ -1,46 +1,94 @@
-# Live deployment config — small budget mainnet experiments
-# Fund the wallet with <$500 across chains before running
+# Monsoon — Live farming configuration
+# WARNING: This uses real RPCs and will submit real transactions when simulate=False
+# Always test with simulate=True first
 
-agent:
-  min_delay_seconds: 60        # minimum 1 min between actions
-  max_delay_seconds: 600       # max 10 min between actions
-  wallet_cooldown_hours: 6     # rest each wallet 6 hours
-  max_actions_per_day: 5       # conservative daily limit
-  simulate: false              # LIVE mode — real transactions
+mode:
+  simulate: true  # SET TO false WHEN READY TO GO LIVE
 
-chains:
-  arbitrum:
-    rpc: "https://arb1.arbitrum.io/rpc"
-    chain_id: 42161
-  optimism:
-    rpc: "https://mainnet.optimism.io"
-    chain_id: 10
-  base:
-    rpc: "https://mainnet.base.org"
-    chain_id: 8453
-
-strategies:
-  bridge:
-    enabled: true
-    weight: 3
-    min_amount: 0.001   # ETH
-    max_amount: 0.01
-    protocols:
-      - "official"       # official chain bridges
-  dex:
-    enabled: true
-    weight: 5
-    min_amount: 0.001
-    max_amount: 0.005
-    protocols:
-      - "uniswap_v3"
-      - "sushiswap"
-
-# Wallet config — NEVER commit private keys
-# Set via environment: WALLET_1_KEY, WALLET_2_KEY, etc.
-# Or use a keystore file
 wallets:
-  - label: "farm-1"
-    # private_key loaded from env: WALLET_1_KEY
-  - label: "farm-2"
-    # private_key loaded from env: WALLET_2_KEY
+  count: 5
+  labels:
+    - monsoon-1
+    - monsoon-2
+    - monsoon-3
+    - monsoon-4
+    - monsoon-5
+  # Fund each wallet with 0.05-0.1 ETH on each target chain before going live
+
+farming:
+  min_delay_seconds: 120    # 2 min minimum between actions
+  max_delay_seconds: 900    # 15 min max — looks organic
+  wallet_cooldown_hours: 6  # rest wallets between sessions
+  max_actions_per_day: 5    # conservative — quality over quantity
+
+  # Randomization to avoid pattern detection
+  randomize_amounts: true
+  min_amount_eth: 0.003
+  max_amount_eth: 0.05
+  randomize_timing: true
+
+# Target protocols and chains for Q2 2026
+targets:
+  high_priority:
+    - name: layerzero_v2
+      chains: [arbitrum, optimism, base, polygon]
+      strategies: [bridge]
+      notes: "Season 2 ongoing. Use Stargate for OFT bridging."
+
+    - name: scroll
+      chains: [scroll]  # need to add scroll connector
+      strategies: [bridge, dex]
+      notes: "Marks program active. Bridge via native + swap on Ambient."
+
+    - name: linea
+      chains: [linea]  # need to add linea connector
+      strategies: [bridge, dex]
+      notes: "Surge program. Bridge + DeFi interactions."
+
+  medium_priority:
+    - name: base_ecosystem
+      chains: [base]
+      strategies: [dex]
+      notes: "Aerodrome, Extra Finance, Seamless — all pre-token or ongoing rewards."
+
+    - name: zksync_era
+      chains: [zksync]  # need to add zksync connector
+      strategies: [bridge, dex]
+      notes: "ZK token live but ongoing distribution possible."
+
+    - name: berachain
+      chains: [berachain]  # need to add berachain connector
+      strategies: [dex]
+      notes: "BGT farming, Proof of Liquidity. BEX swaps."
+
+  watch_list:
+    - name: monad
+      notes: "Pre-mainnet. Testnet farming only for now."
+    - name: eigenlayer_s2
+      notes: "Restaking rewards. Need to stake via operators."
+    - name: fuel
+      notes: "Watch for mainnet launch."
+
+# RPCs — use private/paid RPCs for reliability
+rpcs:
+  ethereum: ${ETH_RPC_URL}
+  arbitrum: ${ARB_RPC_URL}
+  optimism: ${OP_RPC_URL}
+  base: ${BASE_RPC_URL}
+  polygon: ${POLYGON_RPC_URL}
+  bsc: ${BSC_RPC_URL}
+  # Add as needed:
+  # scroll: ${SCROLL_RPC_URL}
+  # linea: ${LINEA_RPC_URL}
+  # zksync: ${ZKSYNC_RPC_URL}
+
+# Gas limits
+gas:
+  max_gas_price_gwei:
+    ethereum: 30
+    arbitrum: 0.5
+    optimism: 0.05
+    base: 0.05
+    polygon: 100
+    bsc: 5
+  max_gas_per_tx_usd: 5.00  # skip if gas would exceed this
