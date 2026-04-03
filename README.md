@@ -1,6 +1,8 @@
-# airdrop-agents
+# monsoon
 
 Autonomous airdrop farming agent framework — multi-wallet, multi-chain, strategy-driven. By [kcolbchain](https://kcolbchain.com) (est. 2015).
+
+**Documentation:** [docs.kcolbchain.com/monsoon](https://docs.kcolbchain.com/monsoon/)
 
 ## Overview
 
@@ -42,12 +44,15 @@ Systematic airdrop farming using autonomous agents. Instead of manually interact
 ## Getting Started
 
 ```bash
-git clone https://github.com/kcolbchain/airdrop-agents.git
-cd airdrop-agents
+git clone https://github.com/kcolbchain/monsoon.git
+cd monsoon
 pip install -r requirements.txt
 
 # Run in simulation mode (no real txns)
 python -m src.agent.farmer --simulate --strategy bridge
+
+# Or use YAML config + env wallets (see config/default.yaml)
+python run.py --config config/default.yaml --ticks 10 --simulate
 
 # Monitor dashboard
 python -m src.monitor.dashboard

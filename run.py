@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-kcolbchain airdrop-agents runner.
+kcolbchain monsoon runner.
 
 Usage:
-    python run.py                          # simulate mode (default config)
-    python run.py --config config/live.yaml  # live mode
-    python run.py --ticks 5 --simulate     # 5 ticks, simulate only
+    python run.py                              # default config/default.yaml
+    python run.py --config config/live.yaml    # alternate config
+    python run.py --ticks 5 --simulate         # force simulation
 """
 import argparse
 import logging
@@ -25,7 +25,8 @@ def load_config(path: str) -> dict:
 
 
 def setup_wallets(config: dict) -> WalletManager:
-    wm = WalletManager()
+    agent_cfg = config.get("agent", {})
+    wm = WalletManager(simulate=agent_cfg.get("simulate", True))
     wallets_cfg = config.get("wallets", [])
 
     for i, w in enumerate(wallets_cfg):
@@ -52,22 +53,12 @@ def setup_wallets(config: dict) -> WalletManager:
 def setup_strategies(config: dict) -> list:
     strategies = []
     strat_cfg = config.get("strategies", {})
-    chains_cfg = config.get("chains", {})
-    chain_names = list(chains_cfg.keys())
 
-    if strat_cfg.get("bridge", {}).get("enabled"):
-        s = BridgeStrategy(
-            supported_chains=chain_names,
-            weight=strat_cfg["bridge"].get("weight", 3),
-        )
-        strategies.append(s)
+    if strat_cfg.get("bridge", {}).get("enabled", True):
+        strategies.append(BridgeStrategy())
 
-    if strat_cfg.get("dex", {}).get("enabled"):
-        s = DexStrategy(
-            supported_chains=chain_names,
-            weight=strat_cfg["dex"].get("weight", 5),
-        )
-        strategies.append(s)
+    if strat_cfg.get("dex", {}).get("enabled", True):
+        strategies.append(DexStrategy())
 
     return strategies
 
@@ -105,7 +96,7 @@ def main():
         agent.add_strategy(strategy)
 
     mode = "SIMULATE" if agent_cfg.get("simulate", True) else "LIVE"
-    logging.info(f"=== kcolbchain airdrop-agents [{mode}] ===")
+    logging.info(f"=== kcolbchain monsoon [{mode}] ===")
     logging.info(f"Wallets: {len(wm.wallets)}, Strategies: {len(agent.strategies)}, Ticks: {args.ticks}")
 
     agent.run(ticks=args.ticks)

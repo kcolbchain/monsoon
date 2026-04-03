@@ -87,6 +87,11 @@ class WalletManager:
         logger.info(f"Imported wallet '{label}': {address}")
         return wallet
 
+    def add_wallet(self, wallet: Wallet) -> Wallet:
+        """Append a fully constructed wallet (used by run.py and loaders)."""
+        self.wallets.append(wallet)
+        return wallet
+
     def get_available_wallets(self) -> list[Wallet]:
         return [w for w in self.wallets if w.active and not w.is_on_cooldown]
 

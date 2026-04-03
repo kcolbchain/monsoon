@@ -1,0 +1,21 @@
+# Default monsoon run — simulation-friendly. For live keys, set WALLET_1_KEY, … in env.
+# See README and https://docs.kcolbchain.com/monsoon/
+
+agent:
+  simulate: true
+  min_delay_seconds: 2
+  max_delay_seconds: 8
+  wallet_cooldown_hours: 4
+  max_actions_per_day: 10
+
+# One row per wallet; private keys via env WALLET_1_KEY, WALLET_2_KEY, … (never commit keys)
+wallets:
+  - label: drop-1
+  - label: drop-2
+  - label: drop-3
+
+strategies:
+  bridge:
+    enabled: true
+  dex:
+    enabled: true
