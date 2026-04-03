@@ -1,0 +1,46 @@
+# Live deployment config — small budget mainnet experiments
+# Fund the wallet with <$500 across chains before running
+
+agent:
+  min_delay_seconds: 60        # minimum 1 min between actions
+  max_delay_seconds: 600       # max 10 min between actions
+  wallet_cooldown_hours: 6     # rest each wallet 6 hours
+  max_actions_per_day: 5       # conservative daily limit
+  simulate: false              # LIVE mode — real transactions
+
+chains:
+  arbitrum:
+    rpc: "https://arb1.arbitrum.io/rpc"
+    chain_id: 42161
+  optimism:
+    rpc: "https://mainnet.optimism.io"
+    chain_id: 10
+  base:
+    rpc: "https://mainnet.base.org"
+    chain_id: 8453
+
+strategies:
+  bridge:
+    enabled: true
+    weight: 3
+    min_amount: 0.001   # ETH
+    max_amount: 0.01
+    protocols:
+      - "official"       # official chain bridges
+  dex:
+    enabled: true
+    weight: 5
+    min_amount: 0.001
+    max_amount: 0.005
+    protocols:
+      - "uniswap_v3"
+      - "sushiswap"
+
+# Wallet config — NEVER commit private keys
+# Set via environment: WALLET_1_KEY, WALLET_2_KEY, etc.
+# Or use a keystore file
+wallets:
+  - label: "farm-1"
+    # private_key loaded from env: WALLET_1_KEY
+  - label: "farm-2"
+    # private_key loaded from env: WALLET_2_KEY
