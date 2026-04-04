@@ -40,3 +40,15 @@ chains:
     rpc_url: https://polygon-rpc.com
     native_token: MATIC
     explorer: https://polygonscan.com
+
+  solana:
+    name: Solana
+    rpc_url: https://api.mainnet-beta.solana.com
+    native_token: SOL
+    explorer: https://solscan.io
+
+  solana-devnet:
+    name: Solana Devnet
+    rpc_url: https://api.devnet.solana.com
+    native_token: SOL
+    explorer: https://solscan.io?cluster=devnet
