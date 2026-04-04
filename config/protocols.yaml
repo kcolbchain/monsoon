@@ -13,6 +13,12 @@ protocols:
       chains: [ethereum, arbitrum, optimism, polygon]
       type: bridge
 
+  lending:
+    aave_v3:
+      label: Aave V3
+      chains: [ethereum, arbitrum, optimism, base, polygon]
+      type: lending
+
   dexes:
     uniswap:
       label: Uniswap V3
