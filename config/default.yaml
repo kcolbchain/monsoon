@@ -19,3 +19,5 @@ strategies:
     enabled: true
   dex:
     enabled: true
+  lending:
+    enabled: true
