@@ -1,20 +1,57 @@
 # monsoon
 
-Autonomous airdrop farming agent framework — multi-wallet, multi-chain, strategy-driven. By [kcolbchain](https://kcolbchain.com) (est. 2015).
+> Research scaffold for autonomous airdrop farming agents — multi-wallet, multi-chain, simulation-first.
+
+By [kcolbchain](https://kcolbchain.com) (est. 2015).
 
 **Documentation:** [docs.kcolbchain.com/monsoon](https://docs.kcolbchain.com/monsoon/)
+**Powered by:** [kcolbchain/scout](https://github.com/kcolbchain/scout) for the registry, fit scoring, and wallet activity primitives.
 
-## Overview
+## What this is
 
-Systematic airdrop farming using autonomous agents. Instead of manually interacting with protocols hoping for a drop, define strategies that agents execute across wallets and chains on autopilot.
+This repository is a **public research scaffold** for thinking about airdrop farming as a systems problem: wallet rotation, cooldowns, strategy plug-ins, eligibility scoring, and simulation mode for safe iteration.
 
-- **Multi-wallet** — manage and rotate across multiple wallets
-- **Multi-chain** — Ethereum, Arbitrum, Optimism, Base, BSC, Polygon
-- **Strategy-driven** — pluggable strategies for bridges, DEXes, lending, social
-- **Simulation mode** — test strategies without real transactions
-- **Dashboard** — CLI monitor for wallet status, actions, eligibility scores
+It is **not** a turnkey production farmer:
 
-## Architecture
+- The strategy modules in `src/strategies/` build a representative *plan*, but execution is wired through `src.chains.evm.EVMConnector.simulate_transaction()` which always returns mock results.
+- There is no signing, broadcasting, gas pricing, slippage protection, or error recovery in this repository.
+- The `--simulate` flag is the only mode that exists today. Live mode is intentionally not implemented in the public scaffold.
+
+For the *intelligence layer* (target registry, fit scoring, wallet activity tracking) used by the production agent, see **[kcolbchain/scout](https://github.com/kcolbchain/scout)** — it's a standalone library: `pip install scout-onchain`.
+
+The kcolbchain operational agent that actually executes transactions is private. That repo lives separately and uses scout as a dependency.
+
+## Why publish a scaffold?
+
+Two reasons:
+
+1. **Open science.** Thinking about airdrop farming as a structured systems problem (rotation, cooldowns, eligibility scoring) instead of opaque manual clicking is independently useful — for researchers, for grant narratives, and for operators reasoning about anti-sybil patterns.
+2. **Substrate for scout.** The data model in this repo (Wallet, Activity, Target, Strategy) is the same one scout consumes. Publishing the scaffold makes the integration boundary explicit.
+
+If you want to build your own farmer, fork this and add your own executor. The simulation harness gives you a safe place to iterate before any real funds are at stake.
+
+## Quick start (simulation only)
+
+```bash
+git clone https://github.com/kcolbchain/monsoon.git
+cd monsoon
+pip install -r requirements.txt
+
+# Simulation mode is the only mode this repo supports
+python -m src.agent.farmer --simulate --strategy bridge
+python run.py --config config/default.yaml --ticks 10 --simulate
+python -m src.monitor.dashboard
+```
+
+For the intelligence side:
+
+```bash
+pip install scout-onchain
+python -m scout targets
+python -m scout get Linea
+```
+
+## Architecture (scaffold view)
 
 ```
 ┌─────────────────────────────────────┐
@@ -22,70 +59,58 @@ Systematic airdrop farming using autonomous agents. Instead of manually interact
 │   (scheduling, rotation, cooldown)  │
 ├──────────┬──────────────────────────┤
 │ Wallet   │      Strategies          │
-│ Manager  │  (bridge, dex, lending)  │
+│ Manager  │  (bridge, dex)           │
 ├──────────┴──────────────────────────┤
-│        Chain Connectors (EVM)       │
+│   Chain Connectors (simulation)     │
 ├─────────────────────────────────────┤
 │     Monitor / CLI Dashboard         │
 └─────────────────────────────────────┘
+            ▲
+            │ uses
+            │
+┌─────────────────────────────────────┐
+│  scout (separate package)           │
+│  • Registry (curated targets)       │
+│  • FitScorer (eligibility 0–100)    │
+│  • WalletTracker (activity feeds)   │
+└─────────────────────────────────────┘
 ```
 
-## Supported Chains
+## Supported chains (simulation chain configs)
 
-| Chain | Chain ID | Status |
-|-------|----------|--------|
-| Ethereum | 1 | Supported |
-| Arbitrum | 42161 | Supported |
-| Optimism | 10 | Supported |
-| Base | 8453 | Supported |
-| BSC | 56 | Supported |
-| Polygon | 137 | Supported |
+| Chain | Chain ID |
+|-------|----------|
+| Ethereum | 1 |
+| Arbitrum | 42161 |
+| Optimism | 10 |
+| Base | 8453 |
+| BSC | 56 |
+| Polygon | 137 |
 
-## Getting Started
-
-```bash
-git clone https://github.com/kcolbchain/monsoon.git
-cd monsoon
-pip install -r requirements.txt
-
-# Run in simulation mode (no real txns)
-python -m src.agent.farmer --simulate --strategy bridge
-
-# Or use YAML config + env wallets (see config/default.yaml)
-python run.py --config config/default.yaml --ticks 10 --simulate
-
-# Monitor dashboard
-python -m src.monitor.dashboard
-```
-
-## Writing Strategies
-
-Extend `BaseStrategy` in `src/strategies/`:
-
-```python
-from src.strategies.base_strategy import BaseStrategy, Action
-
-class MyStrategy(BaseStrategy):
-    def get_actions(self, wallet, chain) -> list[Action]:
-        # Define what actions to take
-        ...
-
-    def evaluate_eligibility(self, wallet) -> float:
-        # Score 0-1 for airdrop eligibility
-        ...
-```
-
-## Project Structure
+## Project structure
 
 ```
 src/
-  agent/         — Core farming agent and wallet manager
-  chains/        — EVM chain connectors
-  strategies/    — Pluggable farming strategies
+  agent/         — Farming agent loop and wallet manager
+  chains/        — EVM chain connector (simulation only)
+  strategies/    — Bridge and DEX strategy scaffolds
   monitor/       — CLI dashboard
 config/          — Chain and protocol configs
 tests/           — Test suite
 ```
+
+## What's not in this repo
+
+If you came here looking for any of these, they live elsewhere:
+
+| Looking for | Where to go |
+|---|---|
+| Real on-chain execution | Not public — kcolbchain runs this privately |
+| Target registry, criteria, fit scoring | [kcolbchain/scout](https://github.com/kcolbchain/scout) |
+| Smart-money wallet tracking | [kcolbchain/scout](https://github.com/kcolbchain/scout) (`WalletTracker`) |
+| Live signing / broadcasting | Not public |
+| Browser-based dApp automation | Not public |
+| Profit sweeping / treasury management | Not public |
 
 ## Disclaimer
 
@@ -93,7 +118,9 @@ This software is for educational and research purposes. Users are responsible fo
 
 ## Contributing
 
-We welcome contributions. See open issues tagged `good-first-issue`.
+Issues and PRs that improve the *scaffold* — better documentation, additional strategy examples, more thoughtful wallet hygiene patterns, ideas for the data model — are welcome. Issues asking for live execution code or wallet keys will be closed.
+
+For data contributions to the registry (new targets, alpha wallets, contract identifications), open a PR against [kcolbchain/scout](https://github.com/kcolbchain/scout) instead.
 
 ## License
 
