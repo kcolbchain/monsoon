@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>monsoon — airdrop farming research scaffold</title>
+<meta name="description" content="Autonomous airdrop farming agents: wallet rotation, cooldowns, strategy plug-ins, eligibility scoring. Research scaffold by kcolbchain." />
+<style>
+  :root { --bg:#0b0d10;--panel:#13161b;--panel-2:#0f1216;--border:#23272f;--fg:#e7e9ee;--muted:#8a93a3;--accent:#22d3ee;--ok:#34d399;--warn:#fbbf24;--hot:#f87171;--info:#7dd3fc;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+  header{padding:22px 32px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px}header h1{margin:0;font-size:20px}header h1 .dot{color:var(--accent)}header p{margin:0;color:var(--muted);font-size:13px}
+  main{padding:24px 32px 80px 32px;max-width:1200px;margin:0 auto}
+  h2{font-size:16px;margin:28px 0 10px 0}h2:first-of-type{margin-top:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+  .card h3{margin:0 0 6px 0;font-size:14px}.card .meta{color:var(--muted);font-size:12px;margin-bottom:10px}
+  .badge{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:99px;background:#1f232b;color:var(--muted);margin-right:4px}
+  .badge.live{background:#0e2a1e;color:var(--ok)}.badge.sim{background:#1a1f27;color:var(--info)}.badge.planned{background:#2a220e;color:var(--warn)}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+  .panel h3{margin:0 0 8px 0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  table.targets{width:100%;border-collapse:collapse;font-size:13px}
+  table.targets th,table.targets td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+  table.targets thead th{color:var(--muted);font-weight:500;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em}
+  table.targets .fit{font-family:var(--mono);font-weight:600}
+  table.targets .fit.high{color:var(--ok)}table.targets .fit.med{color:var(--warn)}table.targets .fit.low{color:var(--hot)}
+  .wallets{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+  .wallet{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:var(--mono);font-size:11px;text-align:center}
+  .wallet .addr{color:var(--muted)}
+  .wallet .status{margin-top:4px;font-size:10px}
+  .wallet.active .status{color:var(--ok)}.wallet.cooldown .status{color:var(--warn)}.wallet.idle .status{color:var(--muted)}
+  svg.timeline{display:block;width:100%;height:160px}
+  svg.timeline text{fill:var(--muted);font-size:10px;font-family:var(--mono)}
+  svg.timeline .bar{rx:3}
+  footer{padding:20px 32px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>monsoon<span class="dot">.</span> <span style="color:var(--muted);font-weight:400">airdrop farming research scaffold</span></h1>
+    <p>Wallet rotation, cooldowns, strategy plug-ins, eligibility scoring. Simulation-first; no live execution in public repo.</p>
+  </div>
+  <div style="display:flex;gap:14px;align-items:center">
+    <a href="https://github.com/kcolbchain/monsoon">source</a>
+    <a href="https://docs.kcolbchain.com/monsoon/">docs</a>
+    <a href="https://github.com/kcolbchain/scout">scout</a>
+  </div>
+</header>
+<main>
+
+<h2>Strategies</h2>
+<div class="grid">
+  <div class="card"><h3>Bridge <span class="badge live">sim</span></h3><div class="meta">Cross-chain bridge deposits — Arbitrum, Base, Optimism, zkSync, Linea. Mimics organic volume patterns.</div><div style="color:var(--muted);font-size:12px">Cooldown: 12-48h per wallet. Rotation: round-robin.</div></div>
+  <div class="card"><h3>DEX Swap <span class="badge live">sim</span></h3><div class="meta">Uniswap / SyncSwap / Maverick swaps across 5 tokens. Spread across wallets to avoid clustering.</div><div style="color:var(--muted);font-size:12px">Cooldown: 6-24h. Rotation: weighted by last-activity age.</div></div>
+  <div class="card"><h3>Lending <span class="badge planned">planned</span></h3><div class="meta">Aave / Compound deposit + borrow cycles. Longer horizons (7-30 days). Tracked in <a href="https://github.com/kcolbchain/monsoon/issues/2">issue #2</a>.</div></div>
+  <div class="card"><h3>LP Provision <span class="badge planned">planned</span></h3><div class="meta">Add/remove liquidity on thin pairs. Pairs with scout's fit scoring to avoid honeypots.</div></div>
+</div>
+
+<h2>Target protocols (from <a href="https://github.com/kcolbchain/scout">scout</a>)</h2>
+<div class="panel" style="overflow-x:auto">
+  <table class="targets">
+    <thead><tr><th>Protocol</th><th>Chain</th><th>Status</th><th>Fit score</th><th>Strategy</th><th>Est. window</th></tr></thead>
+    <tbody id="targets"></tbody>
+  </table>
+</div>
+
+<h2>Wallet pool (simulated)</h2>
+<div class="panel">
+  <p style="margin:0 0 10px 0;color:var(--muted);font-size:12.5px">8 simulated wallets in round-robin rotation. Green = currently active, yellow = in cooldown, grey = idle. Click "Run cycle" to advance one scheduling tick.</p>
+  <button id="runCycle" style="background:var(--panel-2);color:var(--fg);border:1px solid var(--border);padding:6px 14px;border-radius:6px;cursor:pointer;font:inherit;margin-bottom:12px">Run cycle</button>
+  <span id="tick" style="color:var(--muted);font-family:var(--mono);font-size:12px;margin-left:10px">tick 0</span>
+  <div class="wallets" id="wallets"></div>
+</div>
+
+<h2>Scheduling timeline</h2>
+<div class="panel">
+  <svg class="timeline" id="timeline" viewBox="0 0 800 160"></svg>
+</div>
+
+<h2>Airdrop-rights NFT concept</h2>
+<div class="panel">
+  <p style="margin:0 0 8px 0">Tracked in <a href="https://github.com/kcolbchain/monsoon/issues/15">issue #15</a>: wrap farm-cohort exposure as a transferable NFT so depositors can trade their pre-claim position.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:12.5px;color:var(--muted)">
+    <div style="background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:10px"><strong style="color:var(--fg)">1. Deposit USDC</strong><br/>Fund a cohort of wallets farming a specific protocol.</div>
+    <div style="background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:10px"><strong style="color:var(--fg)">2. Mint rights NFT</strong><br/>Receive an ERC-721 representing your pro-rata share of future drops.</div>
+    <div style="background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:10px"><strong style="color:var(--fg)">3. Trade or claim</strong><br/>Sell the NFT pre-claim or redeem it for your share of whatever drops.</div>
+  </div>
+</div>
+
+</main>
+<footer>
+  monsoon is a research scaffold. The public repo runs in <code>--simulate</code> mode only; no signing, no broadcasting, no live execution. Intelligence layer: <a href="https://github.com/kcolbchain/scout">kcolbchain/scout</a>. Operational agent is private.
+</footer>
+
+<script>
+const TARGETS = [
+  { name: "Linea",      chain: "zkEVM",    status: "confirmed", fit: "high", strategy: "bridge + dex", window: "Q2 2026" },
+  { name: "Scroll",     chain: "zkEVM",    status: "confirmed", fit: "high", strategy: "bridge + dex", window: "Q2 2026" },
+  { name: "zkSync Era", chain: "zkRollup", status: "live token",fit: "med",  strategy: "dex + lp",     window: "ongoing" },
+  { name: "Blast",      chain: "optimistic",status: "live token",fit: "low",  strategy: "bridge",       window: "closed" },
+  { name: "Starknet",   chain: "STARK",    status: "confirmed", fit: "med",  strategy: "bridge + dex", window: "Q3 2026" },
+  { name: "Fuel",       chain: "modular",  status: "speculated",fit: "low",  strategy: "bridge",       window: "TBD" },
+  { name: "Monad",      chain: "EVM",      status: "testnet",   fit: "high", strategy: "dex + lp",     window: "Q3 2026" },
+  { name: "Berachain",  chain: "EVM",      status: "live token",fit: "med",  strategy: "dex",          window: "Q2 2026" },
+];
+document.getElementById("targets").innerHTML = TARGETS.map(t =>
+  `<tr><td><strong>${t.name}</strong></td><td>${t.chain}</td><td>${t.status}</td><td class="fit ${t.fit}">${t.fit}</td><td>${t.strategy}</td><td>${t.window}</td></tr>`
+).join("");
+
+// Wallet pool sim
+const WALLETS = Array.from({length:8}, (_,i) => ({
+  addr: "0x" + Math.random().toString(16).slice(2,10) + "…",
+  state: "idle", cooldownLeft: 0, activities: [],
+}));
+let tickN = 0;
+
+function renderWallets() {
+  document.getElementById("wallets").innerHTML = WALLETS.map(w =>
+    `<div class="wallet ${w.state}"><div class="addr">${w.addr}</div><div class="status">${w.state}${w.cooldownLeft > 0 ? " (" + w.cooldownLeft + ")" : ""}</div></div>`
+  ).join("");
+  document.getElementById("tick").textContent = "tick " + tickN;
+}
+
+function renderTimeline() {
+  const svg = document.getElementById("timeline");
+  const W = 800, H = 160, pad = {l:60,r:10,t:10,b:20};
+  const maxT = Math.max(20, tickN + 5);
+  const xScale = t => pad.l + (t / maxT) * (W - pad.l - pad.r);
+  const barH = (H - pad.t - pad.b) / WALLETS.length - 2;
+  const colors = {active:"var(--ok)",cooldown:"var(--warn)",idle:"var(--border)"};
+  let html = `<text x="${pad.l-4}" y="${pad.t}" text-anchor="end" dominant-baseline="hanging">wallet</text>`;
+  // x-axis ticks
+  for (let t = 0; t <= maxT; t += Math.max(1, Math.floor(maxT / 10))) {
+    html += `<text x="${xScale(t)}" y="${H - 4}" text-anchor="middle">${t}</text>`;
+  }
+  WALLETS.forEach((w, i) => {
+    const y = pad.t + i * (barH + 2);
+    html += `<text x="${pad.l-4}" y="${y + barH/2 + 3}" text-anchor="end" font-size="9">${w.addr.slice(0,6)}</text>`;
+    w.activities.forEach(a => {
+      const x1 = xScale(a.start), x2 = xScale(a.end || tickN);
+      html += `<rect class="bar" x="${x1}" y="${y}" width="${Math.max(2,x2-x1)}" height="${barH}" fill="${colors[a.type]}" />`;
+    });
+  });
+  svg.innerHTML = html;
+}
+
+function runCycle() {
+  tickN++;
+  // Advance cooldowns
+  WALLETS.forEach(w => {
+    if (w.state === "cooldown") {
+      w.cooldownLeft--;
+      if (w.cooldownLeft <= 0) {
+        w.state = "idle";
+        if (w.activities.length) w.activities[w.activities.length-1].end = tickN;
+      }
+    }
+  });
+  // Pick an idle wallet, make it active for 1 tick then cooldown
+  const idle = WALLETS.filter(w => w.state === "idle");
+  if (idle.length) {
+    const w = idle[Math.floor(Math.random() * idle.length)];
+    w.state = "active";
+    w.activities.push({type:"active", start: tickN, end: tickN+1});
+    // Schedule cooldown
+    setTimeout(() => {
+      w.state = "cooldown";
+      w.cooldownLeft = 2 + Math.floor(Math.random() * 4);
+      w.activities.push({type:"cooldown", start: tickN+1});
+      renderWallets();
+    }, 0);
+  }
+  renderWallets();
+  renderTimeline();
+}
+document.getElementById("runCycle").addEventListener("click", runCycle);
+renderWallets();
+renderTimeline();
+</script>
+</body>
+</html>
