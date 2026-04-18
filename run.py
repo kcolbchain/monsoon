@@ -17,6 +17,7 @@ from src.agent.farmer import FarmingAgent
 from src.agent.wallet_manager import WalletManager, Wallet
 from src.strategies.bridge_strategy import BridgeStrategy
 from src.strategies.dex_strategy import DexStrategy
+from src.strategies.solana_strategy import SolanaStrategy
 
 
 def load_config(path: str) -> dict:
@@ -59,6 +60,11 @@ def setup_strategies(config: dict) -> list:
 
     if strat_cfg.get("dex", {}).get("enabled", True):
         strategies.append(DexStrategy())
+
+    if strat_cfg.get("solana", {}).get("enabled", False):
+        network = strat_cfg.get("solana", {}).get("network", "mainnet")
+        simulate = config.get("agent", {}).get("simulate", True)
+        strategies.append(SolanaStrategy(network=network, simulate=simulate))
 
     return strategies
 
