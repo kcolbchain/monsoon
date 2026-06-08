@@ -19,7 +19,7 @@ It is **not** a turnkey production farmer:
 
 For the *intelligence layer* (target registry, fit scoring, wallet activity tracking) used by the production agent, see **[kcolbchain/scout](https://github.com/kcolbchain/scout)** — it's a standalone library: `pip install scout-onchain`.
 
-The kcolbchain operational agent that actually executes transactions is private. That repo lives separately and uses scout as a dependency.
+The kcolbchain operational agent that actually executes transactions is private. That repo lives separately and uses `scout-onchain` as a dependency.
 
 ## Why publish a scaffold?
 
