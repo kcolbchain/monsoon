@@ -1,5 +1,7 @@
 # monsoon
 
+[![CI](https://github.com/kcolbchain/monsoon/actions/workflows/ci.yml/badge.svg)](https://github.com/kcolbchain/monsoon/actions/workflows/ci.yml)
+
 > Research scaffold for autonomous airdrop farming agents — multi-wallet, multi-chain, simulation-first.
 
 By [kcolbchain](https://kcolbchain.com) (est. 2015).

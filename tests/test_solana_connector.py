@@ -5,8 +5,15 @@ from unittest.mock import MagicMock, patch
 
 from src.chains.solana.connector import SolanaConnector, SolanaWallet, NETWORKS
 
+try:
+    import solders  # noqa: F401
+    HAS_SOLDERS = True
+except ImportError:
+    HAS_SOLDERS = False
+
 
 class TestSolanaWallet:
+    @pytest.mark.skipif(not HAS_SOLDERS, reason="solders not installed; connector falls back to stub")
     def test_generate_new_wallet(self):
         wallet = SolanaWallet()
         assert wallet.pubkey
