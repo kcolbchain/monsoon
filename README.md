@@ -5,7 +5,7 @@
 By [kcolbchain](https://kcolbchain.com) (est. 2015).
 
 **Documentation:** [docs.kcolbchain.com/monsoon](https://docs.kcolbchain.com/monsoon/)
-**Powered by:** [kcolbchain/scout](https://github.com/kcolbchain/scout) for the registry, fit scoring, and wallet activity primitives.
+**Powered by:** [kcolbchain/scout](https://github.com/kcolbchain/scout) for the registry, fit scoring, and wallet activity tracking.
 
 ## What this is
 
