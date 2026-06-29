@@ -8,6 +8,10 @@ from src.chains.solana.connector import SolanaConnector, SolanaWallet, NETWORKS
 
 class TestSolanaWallet:
     def test_generate_new_wallet(self):
+        # Generating a real base58 keypair requires the optional `solders`
+        # dependency. When it's absent, SolanaWallet falls back to a stub
+        # ("STUB_PUBKEY"), so skip rather than hard-fail.
+        pytest.importorskip("solders")
         wallet = SolanaWallet()
         assert wallet.pubkey
         assert len(wallet.pubkey) > 30  # base58 pubkey
