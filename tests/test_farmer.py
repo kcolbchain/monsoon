@@ -5,6 +5,7 @@ from src.agent.wallet_manager import WalletManager, Wallet
 from src.agent.farmer import FarmingAgent
 from src.strategies.bridge_strategy import BridgeStrategy
 from src.strategies.dex_strategy import DexStrategy
+from src.strategies.solana_strategy import SolanaStrategy
 
 
 def test_wallet_creation():
@@ -73,6 +74,21 @@ def test_farmer_runs_simulation():
     assert agent.total_actions > 0
     status = agent.get_status()
     assert status["total_actions"] > 0
+
+
+def test_farmer_runs_solana_strategy():
+    wm = WalletManager(simulate=True)
+    wallet = wm.create_wallet("solana-sim")
+    config = {"simulate": True, "min_delay_seconds": 0, "max_delay_seconds": 0,
+              "wallet_cooldown_hours": 4, "max_actions_per_day": 100}
+    agent = FarmingAgent(wm, config)
+    agent.add_strategy(SolanaStrategy(network="devnet", simulate=True))
+
+    agent.run(ticks=1)
+
+    assert agent.total_actions == 1
+    assert agent.errors == []
+    assert wallet.activity[0].chain == "solana"
 
 
 def test_eligibility_scoring():

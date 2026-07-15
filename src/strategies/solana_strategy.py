@@ -67,12 +67,13 @@ class SolanaStrategy(BaseStrategy):
         self.connector = SolanaConnector(network=network, simulate=simulate)
         self._activity_log: list[SolanaActivity] = []
 
-    def get_actions(self, wallet: SolanaWallet, **kwargs) -> list[Action]:
+    def get_actions(self, wallet: SolanaWallet, chain: str) -> list[Action]:
         """
         Generate farming actions for a Solana wallet.
 
         Args:
             wallet: SolanaWallet instance
+            chain: Chain selected by the farming agent.
 
         Returns:
             List of Action objects representing activity to perform
@@ -204,6 +205,10 @@ class SolanaStrategy(BaseStrategy):
         if self.simulate:
             return self._simulate_action(wallet, action)
         return self._live_action(wallet, action)
+
+    def execute(self, wallet: SolanaWallet, chain: str, action: Action) -> dict:
+        """Execute an action through the common strategy interface."""
+        return self.execute_action(wallet, action)
 
     def _simulate_action(self, wallet: SolanaWallet, action: Action) -> dict:
         """Simulate an action without network calls."""
